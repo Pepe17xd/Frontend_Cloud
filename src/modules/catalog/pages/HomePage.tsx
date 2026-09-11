@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 import { HeroBanner } from "../../../shared/components/HeroBanner";
 import { MovieCarousel } from "../../../shared/components/MovieCarousel";
+import { BlackHoleLink } from "../../../shared/components/BlackHoleLink";
 import { CatalogState } from "../components/CatalogState";
 import { useCatalogHome } from "../hooks/useMovies";
 
@@ -43,7 +44,7 @@ export function HomePage() {
       </section>
       <section className="community-cta">
         <div><span>COMUNIDAD ASTRA</span><h2>Explora mundos junto a<br />quienes aman el cine.</h2><p>Únete a clubes, comparte listas y haz que cada historia se convierta en una experiencia compartida.</p></div>
-        <Link className="button button-primary" to="/clubs">Explorar clubes</Link>
+        <BlackHoleLink className="button button-primary" to="/clubs">Explorar clubes</BlackHoleLink>
       </section>
     </main>
   );

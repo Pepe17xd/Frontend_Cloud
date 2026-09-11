@@ -31,7 +31,7 @@ export interface WatchRoomCreated {
   status: WatchRoomStatus;
 }
 
-export interface CreateWatchRoomInput { movieId: string; clubId: number | null; hostUserId: string; }
-export interface JoinWatchRoomInput { userId: number; nickname: string; }
+export interface CreateWatchRoomInput { movieId: string; clubId: number | null; }
+export interface JoinWatchRoomInput { nickname: string; }
 export interface JoinWatchRoomResult { roomId: string; joined: boolean; }
 export interface PlaybackUpdate { state: PlaybackStatus; positionSeconds: number; }

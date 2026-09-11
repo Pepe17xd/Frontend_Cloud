@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import { toApiError } from "../../../core/api/apiError";
-import { getAccessToken } from "../../auth/services/authApi";
+import type { Club, CreateClubInput } from "../types/Club";
 import type { CreateWatchRoomInput, JoinWatchRoomInput, JoinWatchRoomResult, PlaybackState, PlaybackUpdate, WatchRoom, WatchRoomCreated } from "../types/WatchRoom";
 
 const communityClient = axios.create({
@@ -10,7 +10,7 @@ const communityClient = axios.create({
 });
 
 communityClient.interceptors.request.use((config) => {
-  const token = getAccessToken();
+  const token = localStorage.getItem("astra.accessToken");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -21,6 +21,18 @@ function unwrapResponse<T>(value: T | { data?: T; result?: T }): T {
 }
 
 export const communityApi = {
+  async listClubs(): Promise<Club[]> {
+    try { const response = await communityClient.get<Club[]>("/api/v1/clubs"); return unwrapResponse(response.data); }
+    catch (error) { throw toApiError(error, "Community Service"); }
+  },
+  async createClub(input: CreateClubInput): Promise<Club> {
+    try { const response = await communityClient.post<Club>("/api/v1/clubs", input); return unwrapResponse(response.data); }
+    catch (error) { throw toApiError(error, "Community Service"); }
+  },
+  async joinClub(clubId: number): Promise<void> {
+    try { await communityClient.post(`/api/v1/clubs/${encodeURIComponent(clubId)}/members`); }
+    catch (error) { throw toApiError(error, "Community Service"); }
+  },
   async createWatchRoom(input: CreateWatchRoomInput): Promise<WatchRoomCreated> {
     try { const response = await communityClient.post<WatchRoomCreated>("/api/v1/watch-rooms", input); return unwrapResponse(response.data); }
     catch (error) { throw toApiError(error, "Community Service"); }

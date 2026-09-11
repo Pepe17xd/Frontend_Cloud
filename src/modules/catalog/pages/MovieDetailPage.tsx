@@ -21,7 +21,6 @@ export function MovieDetailPage() {
       if (!user) throw new Error("Debes iniciar sesión para crear una órbita.");
       const room = await createWatchRoom.mutateAsync({
         movieId: movie.id,
-        hostUserId: user.id,
         clubId: null,
       });
       navigate(`/orbit/${room.code}`);
