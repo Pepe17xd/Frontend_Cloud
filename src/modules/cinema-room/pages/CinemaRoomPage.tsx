@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 
 import { CosmicBackground } from "../../../shared/components/CosmicBackground";
 import { CatalogState } from "../../catalog/components/CatalogState";
@@ -11,11 +11,50 @@ import { useCinemaRoom } from "../hooks/useCinemaRoom";
 
 export function CinemaRoomPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { data: movie, isLoading, isError } = useMovie(id);
   const { data: session, isLoading: isSessionLoading, isError: isSessionError } = useMovieSession(id);
   const room = useCinemaRoom(id);
+
   if (isLoading) return <main className="loading-page"><CatalogState status="loading" /></main>;
   if (isError) return <main className="loading-page"><CatalogState status="error" /></main>;
   if (!movie) return <main className="loading-page"><CatalogState status="empty" /></main>;
-  return <main className="cinema-page"><CosmicBackground className="cinema-cosmos" /><div className="cinema-topbar"><Link to={`/movie/${movie.id}`}>← Volver</Link><p><i /> Órbita sincronizada</p><button>Invitar tripulación</button></div><div className="cinema-layout"><div className="cinema-stage"><VideoPlayer movie={movie} streamUrl={session?.stream?.url} streamType={session?.stream?.type} isPlaying={room.isPlaying} onPlayingChange={room.setIsPlaying} sessionLoading={isSessionLoading} sessionError={isSessionError}/><CinemaControls isPlaying={room.isPlaying} onTogglePlayback={room.togglePlayback} onReaction={room.sendMessage}/></div><aside className="social-panel"><Participants /><LiveChat messages={room.messages} onSend={room.sendMessage}/></aside></div></main>;
+
+  const handleLeave = () => {
+    navigate('/explore');
+  };
+
+  return (
+    <main className="cinema-page">
+      <CosmicBackground className="cinema-cosmos" />
+      <div className="cinema-topbar">
+        <Link to={`/movie/${movie.id}`}>← Volver</Link>
+        <p><i /> Órbita sincronizada</p>
+        <button>Invitar tripulación</button>
+      </div>
+      <div className="cinema-layout">
+        <div className="cinema-stage">
+          <VideoPlayer 
+            movie={movie} 
+            streamUrl={session?.stream?.url} 
+            streamType={session?.stream?.type} 
+            isPlaying={room.isPlaying} 
+            onPlayingChange={room.setIsPlaying} 
+            sessionLoading={isSessionLoading} 
+            sessionError={isSessionError}
+          />
+          <CinemaControls 
+            isPlaying={room.isPlaying} 
+            onTogglePlayback={room.togglePlayback} 
+            onReaction={room.sendMessage}
+            onLeave={handleLeave}
+          />
+        </div>
+        <aside className="social-panel">
+          <Participants />
+          <LiveChat messages={room.messages} onSend={room.sendMessage}/>
+        </aside>
+      </div>
+    </main>
+  );
 }

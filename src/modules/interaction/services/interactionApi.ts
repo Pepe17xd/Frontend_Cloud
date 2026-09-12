@@ -5,6 +5,12 @@ const interactionClient = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+interactionClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem("astra.accessToken");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
 export interface InteractionMovie {
   id: string;
   title: string;
@@ -27,5 +33,21 @@ export const interactionApi = {
   async getUserWatchlist(userId: number): Promise<InteractionMovie[]> {
     const { data } = await interactionClient.get<InteractionResponse>(`/api/v1/users/${userId}/watchlist`);
     return data.items || [];
+  },
+
+  async addLike(movieId: string): Promise<void> {
+    await interactionClient.post(`/api/v1/movies/${movieId}/like`);
+  },
+  
+  async removeLike(movieId: string): Promise<void> {
+    await interactionClient.delete(`/api/v1/movies/${movieId}/like`);
+  },
+  
+  async addToWatchlist(userId: number, movieId: string): Promise<void> {
+    await interactionClient.post(`/api/v1/users/${userId}/watchlist`, { movie_id: movieId });
+  },
+  
+  async removeFromWatchlist(userId: number, movieId: string): Promise<void> {
+    await interactionClient.delete(`/api/v1/users/${userId}/watchlist/${movieId}`);
   }
 };
