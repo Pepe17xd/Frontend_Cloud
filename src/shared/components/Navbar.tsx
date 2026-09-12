@@ -7,7 +7,7 @@ const links = [
   ["/explore", "Explorar"],
   ["/clubs", "Clubes"],
   ["/profile", "Mis películas"],
-  ["/analytics", "Analytics"],
+  ["/analytics", "Tendencia"],
 ] as const;
 
 export function Navbar() {
