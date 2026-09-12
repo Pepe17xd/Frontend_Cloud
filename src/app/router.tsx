@@ -11,6 +11,7 @@ import { MainLayout } from "../shared/layout/MainLayout";
 import { ProtectedRoute } from "../modules/auth/components/ProtectedRoute";
 import { LoginPage } from "../modules/auth/pages/LoginPage";
 import { RegisterPage } from "../modules/auth/pages/RegisterPage";
+import AdminDashboard from "../modules/analytics/pages/AdminDashboard";
 
 export const router = createBrowserRouter([
   {
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
         { path: "/profile", element: <ProfilePage /> },
         { path: "/clubs", element: <ClubsPage /> },
         { path: "/orbit/:code", element: <OrbitPage /> },
+        { path: "/analytics", element: <AdminDashboard /> },
       ] },
     ],
   },
