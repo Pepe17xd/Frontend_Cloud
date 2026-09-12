@@ -1,0 +1,11 @@
+services:
+  frontend:
+    image: villabos/frontend-cloud:v1
+    build: .
+    ports:
+      - "80:80"
+    restart: unless-stopped
+
+networks:
+  default:
+    name: proycloud_net

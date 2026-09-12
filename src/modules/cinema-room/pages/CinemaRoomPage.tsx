@@ -13,7 +13,7 @@ export function CinemaRoomPage() {
   const { id } = useParams();
   const { data: movie, isLoading, isError } = useMovie(id);
   const { data: session, isLoading: isSessionLoading, isError: isSessionError } = useMovieSession(id);
-  const room = useCinemaRoom();
+  const room = useCinemaRoom(id);
   if (isLoading) return <main className="loading-page"><CatalogState status="loading" /></main>;
   if (isError) return <main className="loading-page"><CatalogState status="error" /></main>;
   if (!movie) return <main className="loading-page"><CatalogState status="empty" /></main>;
