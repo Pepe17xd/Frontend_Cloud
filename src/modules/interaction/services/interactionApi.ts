@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const interactionClient = axios.create({
-  baseURL: import.meta.env.VITE_INTERACTION_API_URL,
+  baseURL: import.meta.env.VITE_INTERACTION_API_URL || "https://ipg8mwz20b.execute-api.us-east-1.amazonaws.com",
   headers: { "Content-Type": "application/json" },
 });
 

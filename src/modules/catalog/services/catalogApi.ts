@@ -4,7 +4,7 @@ import type { Movie, MovieDetailResponse, MovieHomeResponse, MovieSessionRespons
 
 
 const catalogClient = axios.create({
-  baseURL: import.meta.env.VITE_CATALOG_API_URL,
+  baseURL: import.meta.env.VITE_CATALOG_API_URL || "https://1cm4tcxy7a.execute-api.us-east-1.amazonaws.com",
   headers: {
     Accept: "application/json",
   },

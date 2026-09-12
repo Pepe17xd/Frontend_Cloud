@@ -5,7 +5,7 @@ import type { Club, CreateClubInput } from "../types/Club";
 import type { CreateWatchRoomInput, JoinWatchRoomInput, JoinWatchRoomResult, PlaybackState, PlaybackUpdate, WatchRoom, WatchRoomCreated } from "../types/WatchRoom";
 
 const communityClient = axios.create({
-  baseURL: import.meta.env.VITE_COMMUNITY_API_URL,
+  baseURL: import.meta.env.VITE_COMMUNITY_API_URL || "https://tv9kgos66m.execute-api.us-east-1.amazonaws.com",
   headers: { "Content-Type": "application/json" },
 });
 

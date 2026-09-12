@@ -1,7 +1,7 @@
 import axios from "axios";
 
-export const analyticsClient = axios.create({
-  baseURL: import.meta.env.VITE_ANALYTICS_API_URL ?? "/api",
+const analyticsClient = axios.create({
+  baseURL: import.meta.env.VITE_ANALYTICS_API_URL || "https://cnwsv2rkvh.execute-api.us-east-1.amazonaws.com",
   headers: { "Content-Type": "application/json" },
 });
 

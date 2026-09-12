@@ -7,7 +7,7 @@ const TOKEN_KEY = "astra.accessToken";
 const USER_KEY = "astra.currentUser";
 
 const identityClient = axios.create({
-  baseURL: import.meta.env.VITE_IDENTITY_API_URL ?? "http://localhost:9000",
+  baseURL: import.meta.env.VITE_IDENTITY_API_URL || "https://0cnn5rae1d.execute-api.us-east-1.amazonaws.com",
   headers: { "Content-Type": "application/json" },
 });
 
