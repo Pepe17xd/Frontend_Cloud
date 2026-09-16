@@ -38,10 +38,15 @@ export const authApi = {
       const meResponse = await communityClient.get("/api/v1/users/me", {
         headers: { Authorization: `Bearer ${accessToken}` }
       });
+      // Decode JWT manually (split payload from header)
+      const payload = JSON.parse(atob(accessToken.split('.')[1]));
+      const role = payload.role || 'USER';
+
       const user = {
-        id: String(meResponse.data.id), // Forzamos a String para el tipo AuthUser pero contiene el número
+        id: String(meResponse.data.id),
         name: meResponse.data.username || meResponse.data.display_name,
-        email: meResponse.data.email
+        email: meResponse.data.email,
+        role: role
       };
       
       localStorage.setItem(USER_KEY, JSON.stringify(user));

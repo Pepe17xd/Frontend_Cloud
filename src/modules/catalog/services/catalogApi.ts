@@ -10,9 +10,9 @@ const catalogClient = axios.create({
   },
 });
 
-async function fetchMovies(): Promise<Movie[]> {
+async function fetchMovies(page = 0, size = 50): Promise<Movie[]> {
   try {
-    const response = await catalogClient.get<unknown>("/api/catalog/movies");
+    const response = await catalogClient.get<unknown>(`/api/catalog/movies?page=${page}&size=${size}`);
     const body = response.data as Record<string, unknown> | Movie[];
     const movies = Array.isArray(body) ? body : body.data ?? body.content ?? body.movies ?? body.items;
     if (!Array.isArray(movies)) throw new Error("La respuesta del catálogo no contiene una lista de películas.");
@@ -42,7 +42,7 @@ function unwrapResponse<T>(value: T | { data?: T; result?: T }): T {
 
 export const catalogApi = {
   async getHome(): Promise<MovieHomeResponse> {
-    const movies = await fetchMovies();
+    const movies = await fetchMovies(0, 100);
     return {
       featuredMovie: movies[0] ?? null,
       sections: [
@@ -52,12 +52,12 @@ export const catalogApi = {
     };
   },
 
-  async getMovies(): Promise<Movie[]> {
-    return fetchMovies();
+  async getMovies(page = 0, size = 20): Promise<Movie[]> {
+    return fetchMovies(page, size);
   },
 
   async getMovie(publicId: string): Promise<MovieDetailResponse> {
-    const movies = await fetchMovies();
+    const movies = await fetchMovies(0, 100);
     const movie = movies.find(({ id }) => id === publicId);
     if (!movie) throw new Error("Película no encontrada en el catálogo");
     return { ...movie, artists: [] };
