@@ -10,6 +10,15 @@ import {
 } from "../hooks/useAnalytics";
 
 export default function AdminDashboard() {
+  const [gapPage, setGapPage] = useState(1);
+  const [lifePage, setLifePage] = useState(1);
+  const pageSize = 10;
+  
+  const safeNum = (val: string | null | undefined, dec = 1) => {
+    if (!val || val === "null" || isNaN(Number(val))) return "N/A";
+    return Number(val).toFixed(dec);
+  };
+
   const { data: genres, isLoading: loadingGenres, error: errorGenres } = useMostWatchedGenres();
   const { data: actors, isLoading: loadingActors, error: errorActors } = useMostPopularActors();
   const { data: clubs, isLoading: loadingClubs, error: errorClubs } = useMostActiveClubs();
@@ -185,7 +194,7 @@ export default function AdminDashboard() {
                       <td style={tdStyle}>{g.genre}</td>
                       <td style={{ ...tdStyle, textAlign: "right" }}>{g.total_movies}</td>
                       <td style={{ ...tdStyle, textAlign: "right" }}>{g.total_watch_rooms}</td>
-                      <td style={{ ...tdStyle, textAlign: "right", color: "#22c55e" }}>{Number(g.avg_rating).toFixed(1)}</td>
+                      <td style={{ ...tdStyle, textAlign: "right", color: "#22c55e" }}>{safeNum(g.avg_rating, 1)}</td>
                       <td style={{ ...tdStyle, textAlign: "right" }}>{g.total_reviews}</td>
                       <td style={{ ...tdStyle, textAlign: "right" }}>{g.total_likes}</td>
                     </tr>
@@ -224,6 +233,7 @@ export default function AdminDashboard() {
             <h2 style={{ margin: 0, marginBottom: "1.5rem", fontSize: "1.25rem", color: "#f3f4f6" }}>Brechas de Contenido</h2>
             {loadingContentGap && <p style={{ color: "#9ca3af" }}>Cargando brechas...</p>}
             {contentGap && (
+              <div style={{ overflowX: 'auto' }}>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.95rem" }}>
                   <thead>
@@ -235,16 +245,22 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {contentGap.map((c) => (
+                    {contentGap.slice((gapPage - 1) * pageSize, gapPage * pageSize).map((c) => (
                       <tr key={c.genre}>
                         <td style={tdStyle}>{c.genre}</td>
                         <td style={{ ...tdStyle, textAlign: "right" }}>{c.catalog_count}</td>
                         <td style={{ ...tdStyle, textAlign: "right" }}>{c.watch_room_count}</td>
-                        <td style={{ ...tdStyle, textAlign: "right", color: "#ef4444", fontWeight: "bold" }}>{Number(c.gap_score).toFixed(2)}</td>
+                        <td style={{ ...tdStyle, textAlign: "right", color: "#ef4444", fontWeight: "bold" }}>{safeNum(c.gap_score, 2)}</td>
                       </tr>
                     ))}
                   </tbody>
+                
                 </table>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 0' }}>
+                  <button onClick={() => setGapPage(p => Math.max(1, p - 1))} disabled={gapPage === 1} style={{ background: '#374151', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: gapPage === 1 ? 'not-allowed' : 'pointer' }}>Anterior</button>
+                  <span style={{ color: '#9ca3af' }}>Página {gapPage} de {Math.ceil(contentGap.length / pageSize)}</span>
+                  <button onClick={() => setGapPage(p => Math.min(Math.ceil(contentGap.length / pageSize), p + 1))} disabled={gapPage === Math.ceil(contentGap.length / pageSize)} style={{ background: '#374151', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: gapPage === Math.ceil(contentGap.length / pageSize) ? 'not-allowed' : 'pointer' }}>Siguiente</button>
+                </div>
               </div>
             )}
           </section>
@@ -266,17 +282,23 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {movieLifecycle.map((m) => (
+                    {movieLifecycle.slice((lifePage - 1) * pageSize, lifePage * pageSize).map((m) => (
                       <tr key={m.title}>
                         <td style={tdStyle}>{m.title}</td>
-                        <td style={{ ...tdStyle, textAlign: "right" }}>{m.catalog_rating}</td>
-                        <td style={{ ...tdStyle, textAlign: "right", color: "#eab308" }}>{Number(m.avg_user_score).toFixed(1)}</td>
+                        <td style={{ ...tdStyle, textAlign: "right" }}>{safeNum(m.catalog_rating, 1)}</td>
+                        <td style={{ ...tdStyle, textAlign: "right", color: "#eab308" }}>{safeNum(m.avg_user_score, 1)}</td>
                         <td style={{ ...tdStyle, textAlign: "right" }}>{m.total_rooms}</td>
                         <td style={{ ...tdStyle, textAlign: "right" }}>{m.total_likes}</td>
                       </tr>
                     ))}
                   </tbody>
+                
                 </table>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 0' }}>
+                  <button onClick={() => setLifePage(p => Math.max(1, p - 1))} disabled={lifePage === 1} style={{ background: '#374151', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: lifePage === 1 ? 'not-allowed' : 'pointer' }}>Anterior</button>
+                  <span style={{ color: '#9ca3af' }}>Página {lifePage} de {Math.ceil(movieLifecycle.length / pageSize)}</span>
+                  <button onClick={() => setLifePage(p => Math.min(Math.ceil(movieLifecycle.length / pageSize), p + 1))} disabled={lifePage === Math.ceil(movieLifecycle.length / pageSize)} style={{ background: '#374151', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: lifePage === Math.ceil(movieLifecycle.length / pageSize) ? 'not-allowed' : 'pointer' }}>Siguiente</button>
+                </div>
               </div>
             )}
           </section>

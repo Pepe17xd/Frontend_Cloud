@@ -20,7 +20,7 @@ export function Navbar() {
       </NavLink>
       <nav className="nav-links" aria-label="Navegación principal">
         {links.map(([to, label]) => {
-          if (to === "/analytics" && user?.role !== 'ADMIN') return null;
+          if (to === "/analytics" && user?.role?.toUpperCase() !== 'ADMIN') return null;
           return (
             <NavLink key={to} to={to} end={to === "/"} className={({ isActive }) => isActive ? "active" : ""}>
               {label}

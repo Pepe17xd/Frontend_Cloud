@@ -24,6 +24,8 @@ export const router = createBrowserRouter([
         { path: "/profile", element: <ProfilePage /> },
         { path: "/clubs", element: <ClubsPage /> },
         { path: "/orbit/:code", element: <OrbitPage /> },
+      ] },
+      { element: <ProtectedRoute requiredRole="ADMIN" />, children: [
         { path: "/analytics", element: <AdminDashboard /> },
       ] },
     ],
