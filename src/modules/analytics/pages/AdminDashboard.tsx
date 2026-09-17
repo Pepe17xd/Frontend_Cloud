@@ -233,7 +233,7 @@ export default function AdminDashboard() {
             <h2 style={{ margin: 0, marginBottom: "1.5rem", fontSize: "1.25rem", color: "#f3f4f6" }}>Brechas de Contenido</h2>
             {loadingContentGap && <p style={{ color: "#9ca3af" }}>Cargando brechas...</p>}
             {contentGap && (
-              <div style={{ overflowX: 'auto' }}>
+
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.95rem" }}>
                   <thead>
