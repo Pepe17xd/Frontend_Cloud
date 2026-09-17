@@ -2,10 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 
 import { catalogApi } from "../services/catalogApi";
 
-export function useMovies() {
+export function useMovies(page = 0, size = 20) {
   return useQuery({
-    queryKey: ["catalog", "movies"],
-    queryFn: catalogApi.getMovies,
+    queryKey: ["catalog", "movies", page, size],
+    queryFn: () => catalogApi.getMovies(page, size),
   });
 }
 
