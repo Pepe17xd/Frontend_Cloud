@@ -25,17 +25,17 @@ export interface ClubStat {
 }
 
 export const getMostWatchedGenres = async (): Promise<GenreStat[]> => {
-  const { data } = await analyticsClient.get("/v1/genres/most-watched");
+  const { data } = await analyticsClient.get("/api/v1/genres/most-watched");
   return data;
 };
 
 export const getMostPopularActors = async (): Promise<ActorStat[]> => {
-  const { data } = await analyticsClient.get("/v1/actors/most-popular?actor_type=ACTOR&limit=5");
+  const { data } = await analyticsClient.get("/api/v1/actors/most-popular?actor_type=ACTOR&limit=5");
   return data;
 };
 
 export const getMostActiveClubs = async (): Promise<ClubStat[]> => {
-  const { data } = await analyticsClient.get("/v1/clubs/most-active?limit=5");
+  const { data } = await analyticsClient.get("/api/v1/clubs/most-active?limit=5");
   return data;
 };
 
@@ -61,9 +61,9 @@ export interface MovieLifecycle {
   total_likes: string; total_rooms: string;
 }
 
-export const getKpis = async (): Promise<KpiData[]> => { const { data } = await analyticsClient.get("/v1/dashboard/kpis"); return data; };
-export const getEngagementFunnel = async (): Promise<EngagementFunnel[]> => { const { data } = await analyticsClient.get("/v1/dashboard/engagement-funnel"); return data; };
-export const getGenreEngagement = async (): Promise<GenreEngagement[]> => { const { data } = await analyticsClient.get("/v1/dashboard/genre-engagement"); return data; };
-export const getPeakHours = async (): Promise<PeakHour[]> => { const { data } = await analyticsClient.get("/v1/dashboard/peak-hours"); return data; };
-export const getContentGapAnalysis = async (): Promise<ContentGap[]> => { const { data } = await analyticsClient.get("/v1/dashboard/content-gap-analysis"); return data; };
-export const getMovieLifecycle = async (): Promise<MovieLifecycle[]> => { const { data } = await analyticsClient.get("/v1/dashboard/movie-lifecycle"); return data; };
+export const getKpis = async (): Promise<KpiData[]> => { const { data } = await analyticsClient.get("/api/v1/dashboard/kpis"); return data; };
+export const getEngagementFunnel = async (): Promise<EngagementFunnel[]> => { const { data } = await analyticsClient.get("/api/v1/dashboard/engagement-funnel"); return data; };
+export const getGenreEngagement = async (): Promise<GenreEngagement[]> => { const { data } = await analyticsClient.get("/api/v1/dashboard/genre-engagement"); return data; };
+export const getPeakHours = async (): Promise<PeakHour[]> => { const { data } = await analyticsClient.get("/api/v1/dashboard/peak-hours"); return data; };
+export const getContentGapAnalysis = async (): Promise<ContentGap[]> => { const { data } = await analyticsClient.get("/api/v1/dashboard/content-gap-analysis"); return data; };
+export const getMovieLifecycle = async (): Promise<MovieLifecycle[]> => { const { data } = await analyticsClient.get("/api/v1/dashboard/movie-lifecycle"); return data; };
