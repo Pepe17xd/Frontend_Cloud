@@ -1,4 +1,5 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 import { CosmicBackground } from "../../../shared/components/CosmicBackground";
 import { CatalogState } from "../../catalog/components/CatalogState";
@@ -15,6 +16,13 @@ export function CinemaRoomPage() {
   const { data: movie, isLoading, isError } = useMovie(id);
   const { data: session, isLoading: isSessionLoading, isError: isSessionError } = useMovieSession(id);
   const room = useCinemaRoom(id);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   if (isLoading) return <main className="loading-page"><CatalogState status="loading" /></main>;
   if (isError) return <main className="loading-page"><CatalogState status="error" /></main>;
@@ -30,7 +38,7 @@ export function CinemaRoomPage() {
       <div className="cinema-topbar">
         <Link to={`/movie/${movie.id}`}>← Volver</Link>
         <p><i /> Órbita sincronizada</p>
-        <button>Invitar tripulación</button>
+        <button onClick={handleCopyLink}>{copied ? "¡Enlace copiado!" : "Invitar tripulación"}</button>
       </div>
       <div className="cinema-layout">
         <div className="cinema-stage">
