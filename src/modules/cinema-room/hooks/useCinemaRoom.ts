@@ -3,103 +3,141 @@ import { getAccessToken } from "../../auth/services/authApi";
 
 export type ChatMessage = { id: number; author: string; text: string };
 
-const WS_BASE_URL = import.meta.env.VITE_CINEMA_API_URL 
-  ? import.meta.env.VITE_CINEMA_API_URL.replace("http", "ws") 
-  : "ws://localhost:8001";
+const HTTP_URL = import.meta.env.VITE_CINEMA_API_URL || "http://localhost:8001";
 
 export function useCinemaRoom(sessionId?: string, movieId?: string) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isPlaying, setIsPlaying] = useState(true);
-  const wsRef = useRef<WebSocket | null>(null);
+  const isPlayingRef = useRef(true);
+  const botMessageAdded = useRef(false);
+
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
 
   useEffect(() => {
     if (!sessionId || !movieId) return;
     
-    // HTTP FALLBACK: Demostrar consumo de microservicios incluso si WS falla
-    const HTTP_URL = import.meta.env.VITE_CINEMA_API_URL || "http://localhost:8001";
-    fetch(`${HTTP_URL}/api/v1/sessions/${sessionId}/stats?movie_id=${movieId}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.likes !== undefined) {
-          const avg = data.average_score || "N/A";
-          setMessages(current => [
-            ...current,
-            { id: Date.now() + Math.random(), author: "🤖 Bot", text: `📊 (HTTP) Datos de la comunidad: Esta película tiene ${data.likes} likes y un rating de ${avg}/5.` }
-          ]);
-        }
-      })
-      .catch(console.error);
+    // 1. Mensaje del Bot con Stats (Consumo de microservicios por HTTP)
+    if (!botMessageAdded.current) {
+      botMessageAdded.current = true;
+      fetch(`${HTTP_URL}/api/v1/sessions/${sessionId}/stats?movie_id=${movieId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.likes !== undefined) {
+            const avg = data.average_score || "N/A";
+            setMessages(current => {
+              // Evitar duplicados
+              if (current.find(m => String(m.author).includes("Bot"))) return current;
+              return [
+                ...current,
+                { id: Date.now() + Math.random(), author: "🤖 Bot", text: `📊 (HTTP) Datos de la comunidad: Esta película tiene ${data.likes} likes y un rating de ${avg}/5.` }
+              ];
+            });
+          }
+        })
+        .catch(console.error);
+    }
       
     const token = getAccessToken();
     if (!token) return;
 
-    // Conectar WebSocket
-    const wsUrl = `${WS_BASE_URL}/api/v1/sessions/${sessionId}/ws?token=${token}`;
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
-
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === "CHAT_MESSAGE") {
-          setMessages((current) => [
-            ...current,
-            { 
-              id: Date.now() + Math.random(), 
-              author: data.user_id ? (String(data.user_id).includes("Bot") ? data.user_id : `Usuario ${data.user_id}`) : "Sistema", 
-              text: data.message 
-            }
-          ]);
-        } else if (data.type === "PLAYBACK_UPDATE") {
+    // 2. Short Polling: En lugar de WebSocket, hacemos un GET cada 1.5s
+    const pollInterval = setInterval(() => {
+      fetch(`${HTTP_URL}/api/v1/sessions/${sessionId}/state`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Error fetching state");
+        return res.json();
+      })
+      .then(data => {
+        // Sincronizar Video
+        if (data.is_playing !== undefined && data.is_playing !== isPlayingRef.current) {
           setIsPlaying(data.is_playing);
-        } else if (data.type === "MEMBER_JOINED") {
-          setMessages((current) => [
-            ...current,
-            { id: Date.now() + Math.random(), author: "Sistema", text: `Un usuario se unió a la órbita` }
-          ]);
-        } else if (data.type === "MEMBER_LEFT") {
-          setMessages((current) => [
-            ...current,
-            { id: Date.now() + Math.random(), author: "Sistema", text: `Un usuario salió de la órbita` }
-          ]);
         }
-      } catch (err) {
-        console.error("Error al procesar mensaje WS", err);
-      }
-    };
+        
+        // Sincronizar Chat
+        if (data.messages && Array.isArray(data.messages)) {
+          setMessages(current => {
+            // Unir mensajes del bot con los mensajes del servidor, evitando duplicados por ID
+            const newMessages = [...current];
+            let changed = false;
+            
+            data.messages.forEach((m: any) => {
+              const msgId = Number(m.id) || new Date(m.sent_at).getTime();
+              if (!newMessages.find(existing => existing.id === msgId)) {
+                changed = true;
+                newMessages.push({
+                  id: msgId,
+                  author: String(m.user_id).includes("Bot") ? m.user_id : `Usuario ${m.user_id}`,
+                  text: m.message
+                });
+              }
+            });
+            
+            if (changed) {
+              return newMessages.sort((a, b) => a.id - b.id);
+            }
+            return current;
+          });
+        }
+      })
+      .catch(err => console.debug("Polling error:", err));
+    }, 1500);
 
     return () => {
-      ws.close();
+      clearInterval(pollInterval);
     };
   }, [sessionId, movieId]);
 
   const sendMessage = (text: string) => {
     const cleanText = text.trim();
-    if (cleanText && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      // Agregar localmente para que se vea rápido
-      setMessages((current) => [...current, { id: Date.now(), author: "Tú", text: cleanText }]);
-      // Enviar al servidor
-      wsRef.current.send(JSON.stringify({ type: "CHAT_MESSAGE", message: cleanText }));
-    } else if (cleanText) {
-      // Fallback si no hay conexión WS (para pruebas UI)
-      setMessages((current) => [...current, { id: Date.now(), author: "Tú (Offline)", text: cleanText }]);
-    }
+    if (!cleanText || !sessionId) return;
+    
+    const token = getAccessToken();
+    
+    // Agregarlo optimísticamente a la UI
+    const tempId = Date.now();
+    setMessages(current => [...current, { id: tempId, author: "Tú", text: cleanText }]);
+    
+    fetch(`${HTTP_URL}/api/v1/sessions/${sessionId}/chat`, {
+      method: "POST",
+      headers: { 
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message: cleanText })
+    }).catch(err => {
+      console.error("Error al enviar mensaje:", err);
+      // Podríamos mostrar un error aquí
+    });
+  };
+
+  const syncPlayback = (nextState: boolean) => {
+    if (!sessionId) return;
+    const token = getAccessToken();
+    
+    fetch(`${HTTP_URL}/api/v1/sessions/${sessionId}/playback`, {
+      method: "PATCH",
+      headers: { 
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ is_playing: nextState, position_seconds: 0 })
+    }).catch(console.error);
   };
 
   const togglePlayback = () => {
     const nextState = !isPlaying;
     setIsPlaying(nextState);
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: "PLAYBACK_UPDATE", is_playing: nextState, position_seconds: 0 }));
-    }
+    syncPlayback(nextState);
   };
 
   const handleSetIsPlaying = (value: boolean | ((val: boolean) => boolean)) => {
     const nextState = typeof value === "function" ? value(isPlaying) : value;
     setIsPlaying(nextState);
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: "PLAYBACK_UPDATE", is_playing: nextState, position_seconds: 0 }));
-    }
+    syncPlayback(nextState);
   };
 
   return { 
