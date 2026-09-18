@@ -15,7 +15,7 @@ export function OrbitPage() {
   const { data: watchRoom, isLoading: isRoomLoading, isError: isRoomError } = useWatchRoom(code);
   const { data: movie, isLoading: isMovieLoading, isError: isMovieError } = useMovie(watchRoom?.movieId);
   const { data: session, isLoading: isSessionLoading, isError: isSessionError } = useMovieSession(watchRoom?.movieId);
-  const room = useCinemaRoom(watchRoom?.sessionId || watchRoom?.id);
+  const room = useCinemaRoom(watchRoom?.sessionId || watchRoom?.id, movie?.id);
   const updatePlayback = useUpdatePlayback();
   const [copied, setCopied] = useState(false);
 

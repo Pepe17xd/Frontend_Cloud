@@ -7,13 +7,29 @@ const WS_BASE_URL = import.meta.env.VITE_CINEMA_API_URL
   ? import.meta.env.VITE_CINEMA_API_URL.replace("http", "ws") 
   : "ws://localhost:8001";
 
-export function useCinemaRoom(sessionId?: string) {
+export function useCinemaRoom(sessionId?: string, movieId?: string) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isPlaying, setIsPlaying] = useState(true);
   const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    if (!sessionId) return;
+    if (!sessionId || !movieId) return;
+    
+    // HTTP FALLBACK: Demostrar consumo de microservicios incluso si WS falla
+    const HTTP_URL = import.meta.env.VITE_CINEMA_API_URL || "http://localhost:8001";
+    fetch(`${HTTP_URL}/api/v1/sessions/${sessionId}/stats?movie_id=${movieId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.likes !== undefined) {
+          const avg = data.average_score || "N/A";
+          setMessages(current => [
+            ...current,
+            { id: Date.now() + Math.random(), author: "🤖 Bot", text: `📊 (HTTP) Datos de la comunidad: Esta película tiene ${data.likes} likes y un rating de ${avg}/5.` }
+          ]);
+        }
+      })
+      .catch(console.error);
+      
     const token = getAccessToken();
     if (!token) return;
 

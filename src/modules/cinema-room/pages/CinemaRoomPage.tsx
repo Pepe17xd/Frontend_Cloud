@@ -15,7 +15,7 @@ export function CinemaRoomPage() {
   const navigate = useNavigate();
   const { data: movie, isLoading, isError } = useMovie(id);
   const { data: session, isLoading: isSessionLoading, isError: isSessionError } = useMovieSession(id);
-  const room = useCinemaRoom(id);
+  const room = useCinemaRoom(id, movie?.id);
   const [copied, setCopied] = useState(false);
 
   const handleCopyLink = () => {
