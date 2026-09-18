@@ -33,9 +33,14 @@ export function VideoPlayer({ movie, streamUrl, streamType, isPlaying, onPlaying
     }
   }, [isPlaying, onPlayingChange, streamUrl]);
 
+  // Truco para la demo: si la URL es de example.com (datos semilla falsos), poner un video real
+  const finalStreamUrl = streamUrl?.includes("example.com")
+    ? "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+    : streamUrl;
+
   return (
     <section className="video-player">
-      {streamUrl ? (
+      {finalStreamUrl ? (
         <video
           ref={videoRef}
           className="cinema-video"
@@ -49,13 +54,13 @@ export function VideoPlayer({ movie, streamUrl, streamType, isPlaying, onPlaying
           onCanPlay={() => setIsBuffering(false)}
           onError={() => { setIsBuffering(false); setVideoError(true); onPlayingChange(false); }}
         >
-          <source src={streamUrl} type={streamType === "MP4" ? "video/mp4" : undefined} />
+          <source src={finalStreamUrl} type="video/mp4" />
           Tu navegador no admite reproducción de video HTML5.
         </video>
       ) : null}
 
       {(sessionLoading || isBuffering) && !videoError ? <div className="video-status" role="status">Cargando video…</div> : null}
-      {(sessionError || !streamUrl || videoError) && !sessionLoading ? <div className="video-status video-status-error" role="alert">No pudimos cargar la reproducción. Inténtalo nuevamente.</div> : null}
+      {(sessionError || !finalStreamUrl || videoError) && !sessionLoading ? <div className="video-status video-status-error" role="alert">No pudimos cargar la reproducción. Inténtalo nuevamente.</div> : null}
       <div className="video-title"><span>VIENDO AHORA</span><h2>{movie?.title || "Película"}</h2></div>
     </section>
   );
