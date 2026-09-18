@@ -30,7 +30,7 @@ export function useCinemaRoom(sessionId?: string) {
             ...current,
             { 
               id: Date.now() + Math.random(), 
-              author: data.user_id ? `Usuario ${data.user_id}` : "Sistema", 
+              author: data.user_id ? (String(data.user_id).includes("Bot") ? data.user_id : `Usuario ${data.user_id}`) : "Sistema", 
               text: data.message 
             }
           ]);
