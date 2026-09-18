@@ -71,7 +71,7 @@ export function useCinemaRoom(sessionId?: string, movieId?: string) {
     return () => {
       ws.close();
     };
-  }, [sessionId]);
+  }, [sessionId, movieId]);
 
   const sendMessage = (text: string) => {
     const cleanText = text.trim();
