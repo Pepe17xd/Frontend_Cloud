@@ -68,11 +68,24 @@ export function useCinemaRoom(sessionId?: string, movieId?: string) {
               const msgId = Number(m.id) || new Date(m.sent_at).getTime();
               if (!newMessages.find(existing => existing.id === msgId)) {
                 changed = true;
+                
+                let myUuid = "";
+                try {
+                  const t = getAccessToken();
+                  if (t) myUuid = JSON.parse(atob(t.split('.')[1])).sub;
+                } catch(e) {}
+                
+                let authorName = `Agente ${String(m.user_id).substring(0,4).toUpperCase()}`;
+                if (String(m.user_id).includes("Bot")) authorName = m.user_id;
+                else if (String(m.user_id) === myUuid) authorName = "Tú";
+                
                 newMessages.push({
                   id: msgId,
-                  author: String(m.user_id).includes("Bot") ? m.user_id : `Usuario ${m.user_id}`,
+                  author: authorName,
                   text: m.message
                 });
+              }
+            });
               }
             });
             
@@ -97,9 +110,7 @@ export function useCinemaRoom(sessionId?: string, movieId?: string) {
     
     const token = getAccessToken();
     
-    // Agregarlo optimísticamente a la UI
-    const tempId = Date.now();
-    setMessages(current => [...current, { id: tempId, author: "Tú", text: cleanText }]);
+    // Se eliminó la inserción optimista para evitar duplicados
     
     fetch(`${HTTP_URL}/api/v1/sessions/${sessionId}/chat`, {
       method: "POST",
