@@ -86,8 +86,6 @@ export function useCinemaRoom(sessionId?: string, movieId?: string) {
                 });
               }
             });
-              }
-            });
             
             if (changed) {
               return newMessages.sort((a, b) => a.id - b.id);
