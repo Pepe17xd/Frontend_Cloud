@@ -13,3 +13,11 @@ export interface CreateClubInput {
   description: string;
   visibility: ClubVisibility;
 }
+
+export interface PaginatedClubs {
+  items: Club[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+}

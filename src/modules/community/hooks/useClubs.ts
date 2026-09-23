@@ -5,8 +5,11 @@ import type { CreateClubInput } from "../types/Club";
 
 const clubsQueryKey = ["community", "clubs"];
 
-export function useClubs() {
-  return useQuery({ queryKey: clubsQueryKey, queryFn: () => communityApi.listClubs() });
+export function useClubs(page: number = 1, search: string = "") {
+  return useQuery({ 
+    queryKey: [...clubsQueryKey, page, search], 
+    queryFn: () => communityApi.listClubs(page, search) 
+  });
 }
 
 export function useCreateClub() {

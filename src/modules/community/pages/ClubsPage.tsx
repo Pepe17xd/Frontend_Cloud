@@ -1,12 +1,24 @@
 import { useState } from "react";
-
 import { useClubs, useCreateClub, useJoinClub } from "../hooks/useClubs";
 
 export function ClubsPage() {
-  const { data: clubs = [], isLoading, isError } = useClubs();
+  const [page, setPage] = useState(1);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  const { data: paginatedData, isLoading, isError } = useClubs(page, searchQuery);
   const createClub = useCreateClub();
   const joinClub = useJoinClub();
   const [error, setError] = useState<string | null>(null);
+
+  const clubs = paginatedData?.items || [];
+  const totalPages = paginatedData?.pages || 1;
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1);
+    setSearchQuery(searchInput);
+  };
 
   const handleCreateClub = async () => {
     const name = window.prompt("Nombre del club");
@@ -24,10 +36,75 @@ export function ClubsPage() {
     setError(null);
     try {
       await joinClub.mutateAsync(clubId);
+      window.alert("¡Te has unido al club exitosamente!");
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "No se pudo unir al club.");
     }
   };
 
-  return <main className="page-shell"><p className="page-eyebrow">COMUNIDAD</p><h1>Clubes de cine</h1><p className="page-lead">Conecta con comunidades que comparten tus historias favoritas.</p><button className="button button-secondary" onClick={handleCreateClub} disabled={createClub.isPending}>✦ {createClub.isPending ? "Creando club…" : "Crear club"}</button>{error ? <p className="orbit-action-error" role="alert">{error}</p> : null}{isLoading ? <p className="page-lead">Cargando clubes…</p> : null}{isError ? <p className="orbit-action-error" role="alert">No se pudieron cargar los clubes.</p> : null}<div className="simple-grid">{clubs.map((club) => <article className="simple-card" key={club.id}><span>{String(club.id).padStart(2, "0")}</span><h2>{club.name}</h2><p>{club.description || "Sin descripción"}</p><button className="button button-secondary" onClick={() => handleJoinClub(club.id)} disabled={joinClub.isPending}>Unirse al club</button></article>)}</div></main>;
+  return (
+    <main className="page-shell">
+      <p className="page-eyebrow">COMUNIDAD</p>
+      <h1>Clubes de cine</h1>
+      <p className="page-lead">Conecta con comunidades que comparten tus historias favoritas.</p>
+      
+      <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem", alignItems: "center", flexWrap: "wrap" }}>
+        <button className="button button-secondary" onClick={handleCreateClub} disabled={createClub.isPending}>
+          ✦ {createClub.isPending ? "Creando club…" : "Crear club"}
+        </button>
+        
+        <form onSubmit={handleSearch} style={{ display: "flex", gap: "0.5rem", flexGrow: 1, maxWidth: "400px" }}>
+          <input 
+            type="text" 
+            placeholder="Buscar clubes..." 
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            style={{ flexGrow: 1, padding: "0.5rem", borderRadius: "4px", border: "1px solid #444", background: "#222", color: "white" }}
+          />
+          <button type="submit" className="button button-primary">Buscar</button>
+        </form>
+      </div>
+
+      {error ? <p className="orbit-action-error" role="alert">{error}</p> : null}
+      {isLoading ? <p className="page-lead">Cargando clubes…</p> : null}
+      {isError ? <p className="orbit-action-error" role="alert">No se pudieron cargar los clubes.</p> : null}
+      
+      {!isLoading && !isError && clubs.length === 0 ? (
+        <p className="page-lead">No se encontraron clubes.</p>
+      ) : (
+        <div className="simple-grid">
+          {clubs.map((club) => (
+            <article className="simple-card" key={club.id}>
+              <span>{String(club.id).padStart(2, "0")}</span>
+              <h2>{club.name}</h2>
+              <p>{club.description || "Sin descripción"}</p>
+              <button className="button button-secondary" onClick={() => handleJoinClub(club.id)} disabled={joinClub.isPending}>
+                Unirse al club
+              </button>
+            </article>
+          ))}
+        </div>
+      )}
+      
+      {totalPages > 1 && (
+        <div style={{ display: "flex", gap: "1rem", marginTop: "2rem", justifyContent: "center", alignItems: "center" }}>
+          <button 
+            className="button button-secondary" 
+            disabled={page === 1} 
+            onClick={() => setPage(p => p - 1)}
+          >
+            Anterior
+          </button>
+          <span>Página {page} de {totalPages}</span>
+          <button 
+            className="button button-secondary" 
+            disabled={page === totalPages} 
+            onClick={() => setPage(p => p + 1)}
+          >
+            Siguiente
+          </button>
+        </div>
+      )}
+    </main>
+  );
 }
