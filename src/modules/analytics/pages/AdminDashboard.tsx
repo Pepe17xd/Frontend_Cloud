@@ -30,7 +30,7 @@ export default function AdminDashboard() {
   const { data: movieLifecycle, isLoading: loadingMovieLifecycle } = useMovieLifecycle();
 
   const kpiData = kpis?.[0] || { total_movies: "0", total_users: "0", total_clubs: "0", total_watch_rooms: "0", total_interactions: "0", avg_rating: "0" };
-  const maxPeakHourRooms = peakHours ? Math.max(...peakHours.map(p => Number(p.total_rooms))) : 1;
+  const maxPeakHourRooms = Array.isArray(peakHours) && peakHours.length > 0 ? Math.max(...peakHours.map(p => Number(p.total_rooms))) : 1;
 
   const sectionStyle = { 
     background: "rgba(20, 20, 30, 0.6)", 
@@ -101,7 +101,7 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {genres.map((g) => (
+                {Array.isArray(genres) && genres.map((g) => (
                   <tr key={g.genre}>
                     <td style={tdStyle}>{g.genre}</td>
                     <td style={{ ...tdStyle, color: "#00e5ff", textAlign: "right", fontWeight: "bold" }}>{Number(g.total_reproducciones).toLocaleString()}</td>
@@ -128,7 +128,7 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {actors.map((a) => (
+                {Array.isArray(actors) && actors.map((a) => (
                   <tr key={a.artist_name}>
                     <td style={tdStyle}>{a.artist_name}</td>
                     <td style={{ ...tdStyle, color: "#00e5ff", textAlign: "right", fontWeight: "bold" }}>{Number(a.total_reproducciones).toLocaleString()}</td>
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {clubs.map((c) => (
+                {Array.isArray(clubs) && clubs.map((c) => (
                   <tr key={c.club_name}>
                     <td style={tdStyle}>{c.club_name}</td>
                     <td style={{ ...tdStyle, textAlign: "center" }}>{c.total_salas}</td>
