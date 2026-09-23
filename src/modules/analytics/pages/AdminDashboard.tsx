@@ -78,10 +78,6 @@ export default function AdminDashboard() {
           <div style={{ color: "#9ca3af", fontSize: "0.9rem", marginBottom: "0.5rem" }}>Total Interacciones</div>
           <div style={{ fontSize: "1.8rem", fontWeight: "bold", color: "#fff" }}>{loadingKpis ? "..." : kpiData.total_interactions}</div>
         </div>
-        <div style={{ ...sectionStyle, borderTop: "4px solid #22c55e" }}>
-          <div style={{ color: "#9ca3af", fontSize: "0.9rem", marginBottom: "0.5rem" }}>Rating Promedio</div>
-          <div style={{ fontSize: "1.8rem", fontWeight: "bold", color: "#fff" }}>{loadingKpis ? "..." : Number(kpiData.avg_rating).toFixed(1)}</div>
-        </div>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "2rem", marginBottom: "2rem" }}>
