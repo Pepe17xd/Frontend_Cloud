@@ -31,7 +31,7 @@ export function useCinemaRoom(sessionId?: string, movieId?: string) {
               if (current.find(m => String(m.author).includes("Bot"))) return current;
               return [
                 ...current,
-                { id: Date.now() + Math.random(), author: "🤖 Bot", text: `📊 (HTTP) Datos de la comunidad: Esta película tiene ${data.likes} likes y un rating de ${avg}/5.` }
+                { id: -1, author: "🤖 Bot", text: `📊 (HTTP) Datos de la comunidad: Esta película tiene ${data.likes} likes y un rating de ${avg}/5.` }
               ];
             });
           }
