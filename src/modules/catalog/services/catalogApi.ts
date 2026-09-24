@@ -56,6 +56,23 @@ export const catalogApi = {
     return fetchMovies(page, size);
   },
 
+  async searchMovies(q: string, genre: string, page = 0, size = 20): Promise<{ content: Movie[]; totalPages: number; totalElements: number }> {
+    try {
+      const params = new URLSearchParams({ page: String(page), size: String(size) });
+      if (q.trim()) params.set("q", q.trim());
+      if (genre.trim()) params.set("genre", genre.trim());
+      const response = await catalogClient.get<unknown>(`/api/catalog/search?${params}`);
+      const body = response.data as Record<string, unknown>;
+      const raw = Array.isArray(body.content) ? body.content : Array.isArray(body) ? body as unknown[] : [];
+      return {
+        content: raw.map(toMovie),
+        totalPages: typeof body.totalPages === "number" ? body.totalPages : 1,
+        totalElements: typeof body.totalElements === "number" ? body.totalElements : raw.length,
+      };
+    } catch (error) { throw toApiError(error, "Catalog Service"); }
+  },
+
+
   async getMovie(publicId: string): Promise<MovieDetailResponse> {
     const movies = await fetchMovies(0, 100);
     const movie = movies.find(({ id }) => id === publicId);

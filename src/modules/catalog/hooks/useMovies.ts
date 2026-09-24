@@ -9,6 +9,17 @@ export function useMovies(page = 0, size = 20) {
   });
 }
 
+export function useMovieSearch(q: string, genre: string, page = 0, size = 20) {
+  const isActive = q.trim().length > 0 || genre.trim().length > 0;
+  return useQuery({
+    queryKey: ["catalog", "search", q, genre, page, size],
+    queryFn: () => catalogApi.searchMovies(q, genre, page, size),
+    enabled: isActive,
+    placeholderData: (prev) => prev,
+  });
+}
+
+
 export function useCatalogHome() {
   return useQuery({
     queryKey: ["catalog", "home"],
